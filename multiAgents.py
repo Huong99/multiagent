@@ -74,7 +74,7 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
 
-        distance = -float("inf")
+        d = -float("inf") 
         foodList = currentGameState.getFood().asList()
 
         if action == Directions.STOP:
@@ -85,10 +85,10 @@ class ReflexAgent(Agent):
                 return -float("inf") 
         
         for food in foodList:
-            if distance < -(manhattanDistance(food, newPos)):
-                distance = -manhattanDistance(food, newPos)
+            if d < -(manhattanDistance(food, newPos)):
+                d = -manhattanDistance(food, newPos)
 
-        return distance
+        return d
 
         "*** YOUR CODE HERE ***"
         #return successorGameState.getScore()
@@ -147,18 +147,18 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
         def giatrimin(state, depth, agent):
-            if state.isWin() or state.isLose() or depth == self.depth:
+            if state.isLose() or state.isWin() or depth == self.depth:
                 return self.evaluationFunction(state)
             else:
                 value = float('inf')
                 for action in state.getLegalActions(agent):
-                    if agent == gameState.getNumAgents() - 1:
-                        value = min(value, giatrimax(state.generateSuccessor(agent, action), depth + 1))
-                    else:
+                    if agent != gameState.getNumAgents() - 1:
                         value = min(value, giatrimin(state.generateSuccessor(agent, action), depth, agent + 1))
+                    else:
+                        value = min(value, giatrimax(state.generateSuccessor(agent, action), depth + 1))
                 return value
         def giatrimax(state, depth):
-            if state.isWin() or state.isLose() or depth == self.depth:
+            if state.isLose() or state.isWin() or depth == self.depth:
                 return self.evaluationFunction(state)
             else:
                 value = - float('inf')
@@ -166,11 +166,10 @@ class MinimaxAgent(MultiAgentSearchAgent):
                     value = max(value, giatrimin(state.generateSuccessor(0, action), depth, 1))
                 return value
         value = - float('inf')
-        bestAction = Directions.STOP
         for action in gameState.getLegalActions(0):
-            next_value = giatrimin(gameState.generateSuccessor(0, action),0, 1)
-            if next_value > value:
-                value = next_value
+            value1 = giatrimin(gameState.generateSuccessor(0, action),0, 1)
+            if value1 > value:
+                value = value1
                 best_action = action
         return best_action
         #util.raiseNotDefined()
@@ -191,10 +190,10 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
           else:
             value = float('inf')
             for action in state.getLegalActions(agent):
-              if agent == state.getNumAgents() - 1:
-                value = min(value, giatrimax(state.generateSuccessor(agent, action), a, b, depth + 1))
-              else:
+              if agent != state.getNumAgents() - 1:
                 value = min(value, giatrimin(state.generateSuccessor(agent, action), a, b,agent + 1, depth))
+              else:
+                value = min(value, giatrimax(state.generateSuccessor(agent, action), a, b, depth + 1))
               if value < a:
                 return value
               b = min(b, value)
@@ -217,11 +216,10 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         value = - float('inf')
         a = - float('inf')
         b = float('inf')
-        optimalAction = Directions.STOP
         for action in gameState.getLegalActions(0):
-          next_value = giatrimin(gameState.generateSuccessor(0, action), a, b, 1, 0)
-          if next_value > value:
-            value = next_value
+          value1 = giatrimin(gameState.generateSuccessor(0, action), a, b, 1, 0)
+          if value1 > value:
+            value = value1
             best_action = action
           a = max(a, value)
         return best_action
