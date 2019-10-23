@@ -146,34 +146,33 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
         "*** YOUR CODE HERE ***"
-        def minvalue(state, depth, agentindex):
+        def giatrimin(state, depth, agent):
             if state.isWin() or state.isLose() or depth == self.depth:
                 return self.evaluationFunction(state)
             else:
                 value = float('inf')
-                for action in state.getLegalActions(agentindex):
-                    if agentindex == gameState.getNumAgents() - 1:
-                        value = min(value, maxvalue(state.generateSuccessor(agentindex, action), depth + 1))
+                for action in state.getLegalActions(agent):
+                    if agent == gameState.getNumAgents() - 1:
+                        value = min(value, giatrimax(state.generateSuccessor(agent, action), depth + 1))
                     else:
-                        value = min(value, minvalue(state.generateSuccessor(agentindex, action), depth, agentindex + 1))
+                        value = min(value, giatrimin(state.generateSuccessor(agent, action), depth, agent + 1))
                 return value
-
-        def maxvalue(state, depth):
+        def giatrimax(state, depth):
             if state.isWin() or state.isLose() or depth == self.depth:
                 return self.evaluationFunction(state)
             else:
                 value = - float('inf')
                 for action in state.getLegalActions(0):
-                    value = max(value, minvalue(state.generateSuccessor(0, action), depth, 1))
+                    value = max(value, giatrimin(state.generateSuccessor(0, action), depth, 1))
                 return value
         value = - float('inf')
         bestAction = Directions.STOP
         for action in gameState.getLegalActions(0):
-            nextValue = minvalue(gameState.generateSuccessor(0, action),0, 1)
-            if nextValue > value:
-                value = nextValue
-                bestAction = action
-        return bestAction
+            next_value = giatrimin(gameState.generateSuccessor(0, action),0, 1)
+            if next_value > value:
+                value = next_value
+                best_action = action
+        return best_action
         #util.raiseNotDefined()
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
@@ -186,44 +185,46 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
           Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        def maxvalue(state, alpha, beta, depth):
+        def giatrimin(state, a, b, agent, depth):
+          if state.isWin() or state.isLose() or depth == self.depth:
+            return self.evaluationFunction(state)
+          else:
+            value = float('inf')
+            for action in state.getLegalActions(agent):
+              if agent == state.getNumAgents() - 1:
+                value = min(value, giatrimax(state.generateSuccessor(agent, action), a, b, depth + 1))
+              else:
+                value = min(value, giatrimin(state.generateSuccessor(agent, action), a, b,agent + 1, depth))
+              if value < a:
+                return value
+              b = min(b, value)
+            return value
+
+
+        def giatrimax(state, a, b, depth):
           if state.isWin() or state.isLose() or depth == self.depth:
             return self.evaluationFunction(state)
           else:
             value = - float('inf')
             for action in state.getLegalActions(0):
-              value = max(value, minvalue(state.generateSuccessor(0, action), alpha, beta, 1, depth))
-              if value > beta:
+              value = max(value, giatrimin(state.generateSuccessor(0, action), a, b, 1, depth))
+              if value > b:
                 return value
-              alpha = max(alpha, value)
+              a = max(a, value)
             return value
-
-        def minvalue(state, alpha, beta, agentindex, depth):
-          if state.isWin() or state.isLose() or depth == self.depth:
-            return self.evaluationFunction(state)
-          else:
-            value = float('inf')
-            for action in state.getLegalActions(agentindex):
-              if agentindex == state.getNumAgents() - 1:
-                value = min(value, maxvalue(state.generateSuccessor(agentindex, action), alpha, beta, depth + 1))
-              else:
-                value = min(value, minvalue(state.generateSuccessor(agentindex, action), alpha, beta,agentindex + 1, depth))
-              if value < alpha:
-                return value
-              beta = min(beta, value)
-            return value
+        
 
         value = - float('inf')
-        alpha = - float('inf')
-        beta = float('inf')
+        a = - float('inf')
+        b = float('inf')
         optimalAction = Directions.STOP
         for action in gameState.getLegalActions(0):
-          nextValue = minvalue(gameState.generateSuccessor(0, action), alpha, beta, 1, 0)
-          if nextValue > value:
-            value = nextValue
-            bestAction = action
-          alpha = max(alpha, value)
-        return bestAction
+          next_value = giatrimin(gameState.generateSuccessor(0, action), a, b, 1, 0)
+          if next_value > value:
+            value = next_value
+            best_action = action
+          a = max(a, value)
+        return best_action
         #util.raiseNotDefined()
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
